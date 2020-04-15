@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>User</title>
+    <!-- 最新版本的 Bootstrap 核心 CSS 文件 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css"
+        integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous" />
+
+    <!-- 可选的 Bootstrap 主题文件（一般不用引入） -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap-theme.min.css"
+        integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous" />
+
+    <!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
+    <script src="https://cdn.staticfile.org/jquery/1.10.2/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/js/bootstrap.min.js"
+        integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script src="./js/ajax.js"></script>
+</head>
+
+<body>
+    <div id="app">
+        <!-- 用户信息表格 -->
+        <h3 style="text-align: center;">用户信息</h3>
+        <div style="text-align: center;"><button id="btn_add" class="btn btn-info btn-sm">添加</button> <button id="btn_del" class="btn btn-danger btn-sm">删除</button></div>
+        <table class="table-bordered table-condensed table-hover" style="padding: 0; margin: 0; width: 100%; text-align: center;">
+            <tr>
+                <th>用户ID</th>
+                <th>用户名</th>
+                <th>密码</th>
+                <th>创建时间</th>
+                <th>加密</th>
+                <th>描述</th>
+                <th class="w200">角色</th>
+                <th class="w200">角色描述</th >
+                <th class="w200">权限</th>
+                <th class="w200">URL</th>
+                <th class="w200">权限描述</th>
+            </tr>
+            <tr v-for="userInfo in userInfos" :key="userInfo.id">
+                <td>{{userInfo.id}}</td>
+                <td>{{userInfo.username}}</td>
+                <td>{{userInfo.password}}</td>
+                <td>{{userInfo.ctime}}</td>
+                <td>{{userInfo.salt | noNull}}</td>
+                <td>{{userInfo.desc}}</td>
+                <td colspan="5" style="margin: 0; padding: 0;">
+                    <table class="table table-bordered table-condensed table-hover"  style="padding: 0; margin: 0; text-align: center;">
+                        <tr v-for="userRole in userInfo.roles" :key="userRole.id">
+                            <td class="w200">{{userRole.name}}</td>
+                            <td class="w200">{{userRole.desc}}</td>
+                            <td colspan="3" style="margin: 0; padding: 0;">
+                                <table class="table table-bordered table-condensed table-hover"  style="padding: 0; margin: 0; text-align: center;">
+                                    <tr v-for="userPermission in userRole.permissions" :key="userPermission.id">
+                                        <td class="w200">{{userPermission.name}}</td>
+                                        <td class="w200">{{userPermission.url}}</td>
+                                        <td class="w200">{{userPermission.desc}}</td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+        <div style="text-align: right;"><a href="/api/realm/logout" class="btn btn-warning btn-sm" role="button">退出</a></div>
+
+        <!-- 添加用户 弹出框 -->
+        <div class="modal fade" id="addModal" tabindex="-1" role="dialog" aria-labelledby="addModalLabel">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                                aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title" id="addModalLabel">新增</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label for="username">用户名</label>
+                            <input type="text" name="username" class="form-control" id="username" placeholder="用户名">
+                        </div>
+                        <div class="form-group">
+                            <label for="password">密码</label>
+                            <input type="password" name="password" class="form-control" id="password" placeholder="密码">
+                        </div>
+                        <div class="form-group">
+                            <label for="repassword">确认密码</label>
+                            <input type="password" name="repassword" class="form-control" id="repassword"
+                                placeholder="确认密码">
+                        </div>
+                        <div class="form-group">
+                            <label for="roles">角色</label>
+                            <div class="checkbox" id="roles" v-for="role in roles" :key="role.id">
+                                <label>
+                                    <input type="checkbox" name="roles" :value="role.id">{{role.name}}({{role.desc}})
+                                </label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="desc">描述</label>
+                            <input type="text" name="desc" class="form-control" id="desc" placeholder="描述">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal"><span
+                                class="glyphicon glyphicon-remove" aria-hidden="true"></span>关闭</button>
+                        <button type="button" id="btn_submit_add" class="btn btn-primary" data-dismiss="modal"><span
+                                class="glyphicon glyphicon-floppy-disk" aria-hidden="true"></span>保存</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 删除用户 弹出框 -->
+        <div class="modal fade" id="delModal" tabindex="-1" role="dialog" aria-labelledby="delModalLabel">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                                aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title" id="delModalLabel">删除</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label for="uid">用户ID</label>
+                            <select type="" name="desc" class="form-control" id="uid" placeholder="用户ID">
+                                <option v-for="uid in userIds" :value="uid">{{uid}}</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal"><span
+                                class="glyphicon glyphicon-remove" aria-hidden="true"></span>关闭</button>
+                        <button type="button" id="btn_submit_del" class="btn btn-primary" data-dismiss="modal"><span
+                                class="glyphicon glyphicon-floppy-remove" aria-hidden="true"></span>删除</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</body>
+<script>
+    var app = new Vue({
+        el: "#app",
+        data: {
+            userInfos: [],
+            roles: [],
+            userIds: []
+        },
+        created: function () {
+            $.get("/api/user/getAll", (resp) => {
+                console.log(resp);
+                if (200 == resp.code) {
+                    app.userInfos = resp.data;
+                    var uids = []
+                    for (userInfo of app.userInfos) {
+                        uids.push(userInfo.id)
+                    }
+                    app.userIds = uids
+                } else {
+                    alert(resp.message);
+                }
+            });
+
+            $.get("/api/role/getAll", (resp) => {
+                console.log(resp);
+                if (200 == resp.code) {
+                    app.roles = resp.data;
+                } else {
+                    alert(resp.message);
+                }
+            });
+        },
+        filters: {
+            noNull: function (val) {
+                if (null == val) {
+                    return "";
+                }
+                return val;
+            },
+        },
+    });
+
+    //注册新增按钮的事件
+    $("#btn_add").click(function () {
+        $("#addModalLabel").text("新增");
+        $('#addModal').modal();
+    });
+
+    $("#btn_del").click(function () {
+        $("#delModalLabel").text("删除");
+        $('#delModal').modal();
+    });
+
+
+    $("#btn_submit_add").click(function () {
+        var password = $("#password").val()
+        var repassword = $("#repassword").val()
+        if (password != repassword) {
+            alert("两次密码不相等")
+            return
+        }
+        var username = $("#username").val()
+        var checkBoxs = $("[name='roles']")
+        console.log(checkBoxs)
+
+        var roles = []
+        for (var i = 0; i < checkBoxs.length; i++) {
+            if (checkBoxs[i].checked) {
+                console.log(checkBoxs[i].value)
+                roles.push({ "id": parseInt(checkBoxs[i].value) })
+            }
+        }
+
+        var desc = $("#desc").val()
+        var userInfo = {
+            "username": username,
+            "password": password,
+            "roles": roles,
+            "desc": desc
+        }
+        console.log(userInfo)
+        $.ajax({
+            url: "/api/user/add",
+            type: 'post',
+            data: JSON.stringify(userInfo),
+            dataType: 'json',
+            contentType: 'application/json; charset=UTF-8',
+            success: (resp) => {
+                console.log(resp)
+                if (200 != resp.code) {
+                    alert(resp.message)
+                }
+                app.$options.created[0]()
+            }
+        })
+    })
+
+    $("#btn_submit_del").click(function () {
+        var uid = $("#uid")[0].value
+        console.log(uid)
+        $.get("/api/user/delete?uid=" + uid, (resp) => {
+            console.log(resp)
+            if (200 != resp.code) {
+                alert(resp.message)
+            }
+            app.$options.created[0]()
+        }, "json")
+    })
+</script>
+<style>
+    .w200 {
+        width: 200px;
+    } 
+</style>
+
+</html>
