@@ -7,6 +7,7 @@ import com.example.demo.entity.User;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -36,6 +37,7 @@ public class UserService implements IService<User>{
         return userDao.getAllUser();
     }
 
+    @Transactional(rollbackFor = {RuntimeException.class, Error.class})
     @Override
     public User deleteById(int id) {
         String message = "";
@@ -56,6 +58,7 @@ public class UserService implements IService<User>{
            log.error(message, "成功", id);
         }else {
             log.error(message, "失败", id);
+            throw new RuntimeException();
         }
 
         return userById.get(0);
@@ -76,6 +79,7 @@ public class UserService implements IService<User>{
         return null;
     }
 
+    @Transactional(rollbackFor = {RuntimeException.class, Error.class})
     @Override
     public User add(User user) {
         String message = "";
@@ -94,6 +98,7 @@ public class UserService implements IService<User>{
                 log.info("关联用户{} --> 权限{} {}", uid, role.getId(), "成功");
             }else {
                 log.error("关联用户{} --> 权限{} {}", uid, role.getId(), "失败");
+                throw new RuntimeException();
             }
         });
 
