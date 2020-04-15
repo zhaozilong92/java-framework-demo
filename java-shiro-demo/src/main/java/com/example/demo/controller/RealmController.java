@@ -9,6 +9,9 @@ import org.apache.shiro.subject.Subject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashSet;
+import java.util.Set;
+
 @RestController
 @RequestMapping("/api/realm")
 public class RealmController {
@@ -17,30 +20,40 @@ public class RealmController {
     private RealmService realmService;
 
     @PostMapping("/login")
-    public Result<?> login(@RequestParam("username") String username, @RequestParam("password") String password) {
+    public Result<?> login(@RequestBody User user) {
         try {
             // shiro中进行登录
             Subject currentUser = SecurityUtils.getSubject();
-            UsernamePasswordToken token = new UsernamePasswordToken(username, password);
+            UsernamePasswordToken token = new UsernamePasswordToken(user.getUsername(), user.getPassword());
             currentUser.login(token);
-            User u = realmService.getUserIdByNameAndPassword(username, password);
+            User u = realmService.getUserIdByNameAndPassword(user.getUsername(), user.getPassword());
             return Result.success(u);
         } catch (Exception e) {
             return Result.fail();
         }
     }
 
-    @GetMapping("/logout")
+    /**
+     * 不需要实现 配置的默认logout过滤器就可以实现退出
+     * @return
+     */
+    /*@GetMapping("/logout")
     public boolean logout(@RequestParam("uid") String uid) {
         Subject currentUser = SecurityUtils.getSubject();
         currentUser.logout();
         return true;
-    }
+    }**/
 
     @GetMapping("/noPermission")
     public Result<?> noPermission(){
         Subject currentUser = SecurityUtils.getSubject();
-        String username = (String)currentUser.getPrincipal();
-        return Result.fail(Result.Code.NO_PERMISSION_302, String.format("current username: [%s] is no permission", username));
+        User user = (User)currentUser.getPrincipal();
+        Set<String> peimissions = new HashSet<>();
+        user.getRoles().forEach(role -> {
+            role.getPermissions().forEach(permission -> {
+                peimissions.add(permission.getName());
+            });
+        });
+        return Result.fail(Result.Code.NO_PERMISSION_302, String.format("Current username: %s, permissions: %s. Is no permission", user.getUsername(), peimissions));
     }
 }

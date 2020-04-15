@@ -1,12 +1,66 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
-    <title>主页</title>
+    <title>权限管理系统</title>
+    <!-- 最新版本的 Bootstrap 核心 CSS 文件 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css"
+        integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous" />
+
+    <!-- 可选的 Bootstrap 主题文件（一般不用引入） -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap-theme.min.css"
+        integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous" />
+
+    <!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
+    <script src="https://cdn.staticfile.org/jquery/1.10.2/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/js/bootstrap.min.js"
+        integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
 </head>
+
 <body>
-    <h3>权限管理系统</h3>
-    <a href="/user.html">用户与角色管理</a>
-    <a href="/api/realm/logout">退出</a>
+    <div id="app" class="default">
+        <h3>权限管理系统</h3>
+        <button @click="userManager">用户与角色管理</button>
+        <button @click="quit">退出</button>
+    </div>
 </body>
+
+<script>
+    var app = new Vue({
+        el: "#app",
+        data: {},
+        methods: {
+            userManager: function () {
+                window.location.href = "/user.html"
+            },
+            quit: function () {
+                window.location.href = "/api/realm/logout"
+            }
+        }
+    })
+</script>
+
+<style>
+    .default {
+        margin: 5% auto;
+        width: 100%;
+        text-align: center;
+    }
+
+    button {
+        display: inline-block;
+        border: 1px cadetblue solid;
+        margin: 5% 1%;
+        padding: 1px;
+        width: 150px;
+        height: 150px;
+        line-height: 150px;
+        text-align: center;
+        background-color: papayawhip;
+    }
+</style>
+
 </html>

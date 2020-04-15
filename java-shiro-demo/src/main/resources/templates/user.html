@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8" />
-    <title>User</title>
+    <title>用户信息</title>
     <!-- 最新版本的 Bootstrap 核心 CSS 文件 -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css"
         integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous" />
@@ -18,15 +18,17 @@
         integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
         crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
-    <script src="./js/ajax.js"></script>
 </head>
 
 <body>
     <div id="app">
         <!-- 用户信息表格 -->
         <h3 style="text-align: center;">用户信息</h3>
-        <div style="text-align: center;"><button id="btn_add" class="btn btn-info btn-sm">添加</button> <button id="btn_del" class="btn btn-danger btn-sm">删除</button></div>
-        <table class="table-bordered table-condensed table-hover" style="padding: 0; margin: 0; width: 100%; text-align: center;">
+        <div style="text-align: center;"><button id="btn_add" class="btn btn-info btn-sm">添加</button> <button
+                id="btn_del" class="btn btn-danger btn-sm">删除</button></div>
+        <hr>
+        <table class="table-bordered table-condensed table-hover"
+            style="padding: 0; margin: 0; width: 100%; text-align: center;">
             <tr>
                 <th>用户ID</th>
                 <th>用户名</th>
@@ -35,7 +37,7 @@
                 <th>加密</th>
                 <th>描述</th>
                 <th class="w200">角色</th>
-                <th class="w200">角色描述</th >
+                <th class="w200">角色描述</th>
                 <th class="w200">权限</th>
                 <th class="w200">URL</th>
                 <th class="w200">权限描述</th>
@@ -48,12 +50,14 @@
                 <td>{{userInfo.salt | noNull}}</td>
                 <td>{{userInfo.desc}}</td>
                 <td colspan="5" style="margin: 0; padding: 0;">
-                    <table class="table table-bordered table-condensed table-hover"  style="padding: 0; margin: 0; text-align: center;">
+                    <table class="table-bordered table-condensed table-hover"
+                        style="padding: 0; margin: 0; width: 100%; text-align: center;">
                         <tr v-for="userRole in userInfo.roles" :key="userRole.id">
                             <td class="w200">{{userRole.name}}</td>
                             <td class="w200">{{userRole.desc}}</td>
                             <td colspan="3" style="margin: 0; padding: 0;">
-                                <table class="table table-bordered table-condensed table-hover"  style="padding: 0; margin: 0; text-align: center;">
+                                <table class="table-bordered table-condensed table-hover"
+                                    style="padding: 0; margin: 0; width: 100%; text-align: center;">
                                     <tr v-for="userPermission in userRole.permissions" :key="userPermission.id">
                                         <td class="w200">{{userPermission.name}}</td>
                                         <td class="w200">{{userPermission.url}}</td>
@@ -66,7 +70,9 @@
                 </td>
             </tr>
         </table>
-        <div style="text-align: right;"><a href="/api/realm/logout" class="btn btn-warning btn-sm" role="button">退出</a></div>
+        <hr>
+        <div style="text-align: right;"><a href="/api/realm/logout" class="btn btn-warning btn-sm" role="button">退出</a>
+        </div>
 
         <!-- 添加用户 弹出框 -->
         <div class="modal fade" id="addModal" tabindex="-1" role="dialog" aria-labelledby="addModalLabel">
@@ -141,6 +147,13 @@
             </div>
         </div>
 
+        <!-- 警告框-->
+        <div v-show="errorBar.show" class="alert alert-danger alert-dismissible" role="alert">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span
+                    aria-hidden="true">&times;</span></button>
+            <p>{{errorBar.content}}</p>
+        </div>
+
     </div>
 
 </body>
@@ -148,6 +161,7 @@
     var app = new Vue({
         el: "#app",
         data: {
+            errorBar: { show: false, content: "" },
             userInfos: [],
             roles: [],
             userIds: []
@@ -207,7 +221,6 @@
         }
         var username = $("#username").val()
         var checkBoxs = $("[name='roles']")
-        console.log(checkBoxs)
 
         var roles = []
         for (var i = 0; i < checkBoxs.length; i++) {
@@ -234,9 +247,11 @@
             success: (resp) => {
                 console.log(resp)
                 if (200 != resp.code) {
-                    alert(resp.message)
+                    app.errorBar.show = true
+                    app.errorBar.content = resp.message
                 }
                 app.$options.created[0]()
+                setTimeout(clearMessage, 10*1000)
             }
         })
     })
@@ -247,16 +262,22 @@
         $.get("/api/user/delete?uid=" + uid, (resp) => {
             console.log(resp)
             if (200 != resp.code) {
-                alert(resp.message)
+                app.errorBar.show = true
+                app.errorBar.content = resp.message
             }
             app.$options.created[0]()
+            setTimeout(clearMessage, 10*1000)
         }, "json")
     })
+
+    clearMessage =  function(){
+        app.errorBar.show = false
+    }
 </script>
 <style>
     .w200 {
         width: 200px;
-    } 
+    }
 </style>
 
 </html>
