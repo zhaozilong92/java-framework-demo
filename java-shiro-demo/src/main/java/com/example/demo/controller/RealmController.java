@@ -48,12 +48,12 @@ public class RealmController {
     public Result<?> noPermission(){
         Subject currentUser = SecurityUtils.getSubject();
         User user = (User)currentUser.getPrincipal();
-        Set<String> peimissions = new HashSet<>();
+        Set<String> permissions = new HashSet<>();
         user.getRoles().forEach(role -> {
             role.getPermissions().forEach(permission -> {
-                peimissions.add(permission.getName());
+                permissions.add(permission.getName());
             });
         });
-        return Result.fail(Result.Code.NO_PERMISSION_302, String.format("Current username: %s, permissions: %s. Is no permission", user.getUsername(), peimissions));
+        return Result.fail(Result.Code.NO_PERMISSION_302, String.format("Current username: %s, permissions: %s. Is no permission", user.getUsername(), permissions));
     }
 }
