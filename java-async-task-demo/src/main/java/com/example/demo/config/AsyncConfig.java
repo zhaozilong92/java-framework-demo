@@ -6,6 +6,7 @@ import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import java.util.concurrent.Executor;
+import java.util.concurrent.ThreadPoolExecutor;
 
 @Configuration
 @EnableAsync // 1.开启多线程支持
@@ -24,6 +25,13 @@ public class AsyncConfig {
         //允许线程的空闲时间60秒：当超过了核心线程出之外的线程在空闲时间到达之后会被销毁
         executor.setKeepAliveSeconds(60);
         //线程池名的前缀：设置好了之后可以方便我们定位处理任务所在的线程池
+
+        executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
+        // 等待所有任务都完成再继续销毁其他的Bean
+        executor.setWaitForTasksToCompleteOnShutdown(true);
+        // 线程池中任务的等待时间，如果超过这个时候还没有销毁就强制销毁，以确保应用最后能够被关闭，而不是阻塞住
+        executor.setAwaitTerminationSeconds(60);
+
         executor.setThreadNamePrefix("DailyAsync-");
         executor.initialize();
         return executor;
