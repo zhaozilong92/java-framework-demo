@@ -8,6 +8,7 @@ class JavaAsyncTaskDemoApplicationTests {
 
 	@Test
 	void contextLoads() {
+		print('')
 	}
 
 }
