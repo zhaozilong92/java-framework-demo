@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Redis</title>
+    <script src="https://cdn.staticfile.org/jquery/1.10.2/jquery.min.js"></script>
+</head>
+<body>
+    <h3 style="text-align: center">hello redis</h3>
+    剩余票数 <button onclick="buy()">购买</button>
+    <div id="info"></div>
+
+</body>
+<script>
+    window.onload = function () {
+        flushTickets()
+    }
+
+    function buy() {
+        $.get("/tickets/buy", function (data) {
+            console.log(data)
+            if(data){
+                flushTickets()
+            }
+        })
+
+
+    }
+
+    function flushTickets(){
+        $.get("/tickets/balance", function (data) {
+            console.log(data)
+            var html = `类型: 站票, 数量: ${data}  <bt/>`
+            $("#info").html(html)
+        })
+    }
+</script>
+</html>
