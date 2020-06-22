@@ -1,0 +1,1 @@
+INSERT INTO tbl_train_tickets (id, count ,type) VALUES(0,100,'站票');
